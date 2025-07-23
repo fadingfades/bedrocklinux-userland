@@ -297,14 +297,14 @@ vendor/libcap/.success_fetching_source:
 	rm -rf vendor/libcap
 	mkdir -p vendor/libcap
 	git clone --depth=1 \
-		-b `git ls-remote --tags 'https://git.kernel.org/pub/scm/libs/libcap/libcap.git/' | \
+		-b `git ls-remote --tags 'https://kernel.googlesource.com/pub/scm/linux/kernel/git/morgan/libcap.git/' | \
 		awk -F/ '{print $$NF}' | \
 		sed 's/^libcap-//g' | \
 		grep '^[0-9.]*$$' | \
 		grep '[.]' | \
 		sort -t . -k1,1n -k2,2n -k3,3n -k4,4n -k5,5n | \
 		tail -n1 | \
-		sed 's/^/libcap-/'` 'https://git.kernel.org/pub/scm/libs/libcap/libcap.git/' \
+		sed 's/^/libcap-/'` 'https://kernel.googlesource.com/pub/scm/linux/kernel/git/morgan/libcap.git/' \
 		vendor/libcap
 	touch vendor/libcap/.success_fetching_source
 $(COMPLETED)/libcap: vendor/libcap/.success_fetching_source $(COMPLETED)/builddir $(COMPLETED)/musl
@@ -684,15 +684,8 @@ vendor/lvm2/.success_retrieving_source:
 	rm -rf vendor/lvm2/
 	mkdir -p vendor/lvm2
 	# no `--depth 1` because this repo does not support it
-	git clone \
-		-b `git ls-remote --tags 'https://sourceware.org/git/lvm2.git' | \
-		awk -F/ '{print $$NF}' | \
-		grep '^v[0-9_]*$$' | \
-		sed 's/^v//g' | \
-		sort -t _ -k1,1n -k2,2n -k3,3n -k4,4n -k5,5n | \
-		tail -n1 | \
-		sed 's/^/v/'` 'https://sourceware.org/git/lvm2.git' \
-		vendor/lvm2
+	git clone -b v2_03_22 https://sourceware.org/git/lvm2.git vendor/lvm2
+	cd vendor/lvm2 && patch -p0 -i ../../patches/lvm2/fix-device-id.patch
 	cd vendor/lvm2 && patch -p0 -i ../../patches/lvm2/fix-stdio.patch
 	# hack to fix bad imports looking for LOCK_EX
 	echo '#include <sys/file.h>' >> vendor/lvm2/lib/misc/lib.h
